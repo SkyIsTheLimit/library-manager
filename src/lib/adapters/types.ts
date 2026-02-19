@@ -28,6 +28,6 @@ export interface BookAdapter {
   name: string;
   definition?: AdapterDefinition;
   matches(url: string): boolean;
-  fetchMetadata?(url: string): Promise<BookMetadata | null>;
+  fetchMetadata(url: string): Promise<BookMetadata | null>;
   generateReaderUrl(externalId: string, slug?: string): string;
 }

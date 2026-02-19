@@ -5,8 +5,8 @@ import { db } from "@/lib/db";
 import { useLiveQuery } from "dexie-react-hooks";
 import { fetchBookMetadata } from "@/lib/actions";
 import { getAdapterById, getAdapterForUrl } from "@/lib/adapters";
-import { AdapterFormDialog } from "@/components/CreateAdapterDialog";
-import { ManageAdaptersDialog } from "@/components/ManageAdaptersDialog";
+import { AdapterFormDialog } from "@/components/adapters/CreateAdapterDialog";
+import { ManageAdaptersDialog } from "@/components/adapters/ManageAdaptersDialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

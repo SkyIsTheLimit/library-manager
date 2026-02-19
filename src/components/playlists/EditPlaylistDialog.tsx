@@ -14,6 +14,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Settings2, Trash2 } from "lucide-react";
 
+import { libraryService } from "@/lib/services/library";
+
 export function EditPlaylistDialog({ playlist }: { playlist: Playlist }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(playlist.name);
@@ -21,7 +23,7 @@ export function EditPlaylistDialog({ playlist }: { playlist: Playlist }) {
 
   const handleUpdate = async () => {
     if (!name) return;
-    await db.playlists.update(playlist.id!, {
+    await libraryService.updatePlaylist(playlist.id!, {
       name,
       description,
     });
@@ -30,7 +32,7 @@ export function EditPlaylistDialog({ playlist }: { playlist: Playlist }) {
 
   const handleDelete = async () => {
     if (confirm("Are you sure you want to delete this playlist?")) {
-      await db.playlists.delete(playlist.id!);
+      await libraryService.deletePlaylist(playlist.id!);
       setOpen(false);
     }
   };

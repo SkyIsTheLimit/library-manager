@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { db } from '@/lib/db';
+import { libraryService } from '@/lib/services/library';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -27,22 +27,10 @@ export function UpdateProgressDialog({
   const [percent, setPercent] = useState(initialPercent || 0);
 
   const handleUpdate = async () => {
-    const existing = await db.progress.where('bookId').equals(bookId).first();
-    if (existing) {
-      await db.progress.update(existing.id!, {
-        currentChapterTitle: chapter,
-        percentComplete: Number(percent),
-        lastAccessed: Date.now(),
-      });
-    } else {
-      await db.progress.add({
-        bookId,
-        currentChapterUrl: '',
-        currentChapterTitle: chapter,
-        percentComplete: Number(percent),
-        lastAccessed: Date.now(),
-      });
-    }
+    await libraryService.updateProgress(bookId, {
+      currentChapterTitle: chapter,
+      percentComplete: Number(percent)
+    });
     setOpen(false);
   };
 

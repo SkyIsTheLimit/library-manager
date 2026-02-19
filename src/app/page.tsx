@@ -3,21 +3,21 @@
 import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
-import { AddBookDialog } from "@/components/AddBookDialog";
-import { AddToPlaylistDialog } from "@/components/AddToPlaylistDialog";
-import { PlaylistDialog } from "@/components/PlaylistDialog";
-import { EditPlaylistDialog } from "@/components/EditPlaylistDialog";
-import { UpdateProgressDialog } from "@/components/UpdateProgressDialog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AddBookDialog } from "@/components/books/AddBookDialog";
+import { AddToPlaylistDialog } from "@/components/playlists/AddToPlaylistDialog";
+import { PlaylistDialog } from "@/components/playlists/PlaylistDialog";
+import { EditPlaylistDialog } from "@/components/playlists/EditPlaylistDialog";
+import { UpdateProgressDialog } from "@/components/books/UpdateProgressDialog";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   ExternalLink,
   BookOpen,
   Trash2,
-  List,
-  CheckCircle2,
 } from "lucide-react";
 import Link from "next/link";
+
+import { libraryService } from "@/lib/services/library";
 
 export default function Dashboard() {
   const [selectedPlaylistId, setSelectedPlaylistId] = useState<number | null>(
@@ -42,36 +42,12 @@ export default function Dashboard() {
 
   const deleteBook = async (id: number, externalId: string) => {
     if (confirm("Are you sure you want to remove this book?")) {
-      await db.books.delete(id);
-      await db.progress.where("bookId").equals(externalId).delete();
-      if (playlists) {
-        for (const playlist of playlists) {
-          if (playlist.bookIds.includes(externalId)) {
-            await db.playlists.update(playlist.id!, {
-              bookIds: playlist.bookIds.filter((id) => id !== externalId),
-            });
-          }
-        }
-      }
+      await libraryService.deleteBook(id, externalId);
     }
   };
 
-  const updateAccessTime = async (externalId: string) => {
-    const existing = await db.progress
-      .where("bookId")
-      .equals(externalId)
-      .first();
-    if (existing) {
-      await db.progress.update(existing.id!, { lastAccessed: Date.now() });
-    } else {
-      await db.progress.add({
-        bookId: externalId,
-        currentChapterUrl: "",
-        currentChapterTitle: "",
-        percentComplete: 0,
-        lastAccessed: Date.now(),
-      });
-    }
+  const updateAccessTime = (externalId: string) => {
+    libraryService.updateLastAccessed(externalId);
   };
 
   return (

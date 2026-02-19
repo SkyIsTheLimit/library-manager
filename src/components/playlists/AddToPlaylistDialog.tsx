@@ -13,16 +13,13 @@ import {
 import { ListPlus } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
+import { libraryService } from '@/lib/services/library';
+
 export function AddToPlaylistDialog({ externalId }: { externalId: string }) {
   const playlists = useLiveQuery(() => db.playlists.toArray());
 
-  const toggleBookInPlaylist = async (playlistId: number, bookIds: string[]) => {
-    const isBookInPlaylist = bookIds.includes(externalId);
-    const newBookIds = isBookInPlaylist
-      ? bookIds.filter((id) => id !== externalId)
-      : [...bookIds, externalId];
-
-    await db.playlists.update(playlistId, { bookIds: newBookIds });
+  const handleToggle = async (playlistId: number) => {
+    await libraryService.toggleBookInPlaylist(playlistId, externalId);
   };
 
   return (
@@ -50,7 +47,7 @@ export function AddToPlaylistDialog({ externalId }: { externalId: string }) {
                   key={playlist.id}
                   variant={isActive ? "secondary" : "outline"}
                   className="justify-between"
-                  onClick={() => toggleBookInPlaylist(playlist.id!, playlist.bookIds)}
+                  onClick={() => handleToggle(playlist.id!)}
                 >
                   {playlist.name}
                   {isActive && <span className="text-xs font-bold text-primary">Added</span>}

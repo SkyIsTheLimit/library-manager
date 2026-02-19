@@ -15,14 +15,14 @@ import {
   Save,
   Clock,
   CheckCircle2,
-  Layout,
-  ChevronLeft,
   PanelLeftClose,
   PanelLeftOpen,
   Link as LinkIcon,
   Loader2,
 } from "lucide-react";
 import Link from "next/link";
+
+import { libraryService } from "@/lib/services/library";
 
 export default function UniversalController() {
   const { id } = useParams();
@@ -73,26 +73,11 @@ export default function UniversalController() {
 
   const handleSync = async () => {
     if (!activeBook) return;
-    const existing = await db.progress
-      .where("bookId")
-      .equals(activeBook.externalId)
-      .first();
-    if (existing) {
-      await db.progress.update(existing.id!, {
-        currentChapterTitle: chapter,
-        currentChapterUrl: chapterUrl,
-        percentComplete: Number(percent),
-        lastAccessed: Date.now(),
-      });
-    } else {
-      await db.progress.add({
-        bookId: activeBook.externalId,
-        currentChapterUrl: chapterUrl,
-        currentChapterTitle: chapter,
-        percentComplete: Number(percent),
-        lastAccessed: Date.now(),
-      });
-    }
+    await libraryService.updateProgress(activeBook.externalId, {
+      currentChapterTitle: chapter,
+      currentChapterUrl: chapterUrl,
+      percentComplete: Number(percent)
+    });
     setHasSynced(true);
     setTimeout(() => setHasSynced(false), 2000);
   };
