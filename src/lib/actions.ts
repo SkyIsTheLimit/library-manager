@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio';
-import { getAdapterForUrl, getAdapterById } from './adapters';
+import { getAdapterForUrl, getAdapterById, type AdapterDefinition } from './adapters';
 
 export async function fetchBookMetadata(url: string, adapterId?: string) {
   // Now running on client, so this will work!
@@ -22,7 +22,7 @@ export async function fetchBookMetadata(url: string, adapterId?: string) {
     const $ = cheerio.load(html);
 
     // Extract title, author, cover using selectors from definition or defaults
-    const def = adapter.definition || {
+    const def: Partial<AdapterDefinition> = adapter.definition || {
       titleSelector: 'meta[property="og:title"]',
       authorSelector: 'meta[name="author"]',
       coverSelector: 'meta[property="og:image"]'

@@ -21,11 +21,17 @@ interface AdapterFormDialogProps {
   trigger?: React.ReactNode;
 }
 
-export function AdapterFormDialog({ adapter, onSaved, trigger }: AdapterFormDialogProps) {
+export function AdapterFormDialog({
+  adapter,
+  onSaved,
+  trigger,
+}: AdapterFormDialogProps) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(adapter?.name || "");
   const [urlPattern, setUrlPattern] = useState(adapter?.urlMatchPattern || "");
-  const [urlTemplate, setUrlTemplate] = useState(adapter?.readerUrlTemplate || "");
+  const [urlTemplate, setUrlTemplate] = useState(
+    adapter?.readerUrlTemplate || "",
+  );
   const [error, setError] = useState("");
 
   // Sync state if adapter prop changes (important for editing)
@@ -44,8 +50,10 @@ export function AdapterFormDialog({ adapter, onSaved, trigger }: AdapterFormDial
     }
 
     try {
-      const id = adapter?.id || (name.toLowerCase().replace(/\s+/g, "-") + "-" + Date.now());
-      
+      const id =
+        adapter?.id ||
+        name.toLowerCase().replace(/\s+/g, "-") + "-" + Date.now();
+
       const definition: AdapterDefinition = {
         ...adapter, // Keep existing selectors if they exist
         id,
@@ -59,7 +67,10 @@ export function AdapterFormDialog({ adapter, onSaved, trigger }: AdapterFormDial
 
       if (adapter) {
         // Find existing record ID for update if using Dexie auto-inc
-        const existing = await db.adapters.where("id").equals(adapter.id).first();
+        const existing = await db.adapters
+          .where("id")
+          .equals(adapter.id)
+          .first();
         if (existing?.id) {
           await db.adapters.update(existing.id as any, definition);
         } else {
@@ -87,19 +98,23 @@ export function AdapterFormDialog({ adapter, onSaved, trigger }: AdapterFormDial
       <Edit2 className="h-3 w-3" />
     </Button>
   ) : (
-    <Button variant="ghost" size="xs" className="text-[10px] font-bold uppercase tracking-wider text-primary hover:text-primary h-6 px-2">
+    <Button
+      variant="ghost"
+      size="xs"
+      className="text-[10px] font-bold uppercase tracking-wider text-primary hover:text-primary h-6 px-2"
+    >
       <Settings2 className="h-3 w-3 mr-1" /> Create Adapter
     </Button>
   );
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger || defaultTrigger}
-      </DialogTrigger>
+      <DialogTrigger asChild>{trigger || defaultTrigger}</DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>{adapter ? "Edit Adapter" : "Create Custom Adapter"}</DialogTitle>
+          <DialogTitle>
+            {adapter ? "Edit Adapter" : "Create Custom Adapter"}
+          </DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="space-y-2">
@@ -112,8 +127,10 @@ export function AdapterFormDialog({ adapter, onSaved, trigger }: AdapterFormDial
           </div>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <label className="text-sm font-medium">URL Match Pattern (Regex)</label>
-              <HelpCircle className="h-3 w-3 text-muted-foreground" title="Regex to match the source URL" />
+              <label className="text-sm font-medium">
+                URL Match Pattern (Regex)
+              </label>
+              <HelpCircle className="h-3 w-3 text-muted-foreground" />
             </div>
             <Input
               placeholder="e.g. my-proxy\.com"
@@ -124,7 +141,7 @@ export function AdapterFormDialog({ adapter, onSaved, trigger }: AdapterFormDial
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <label className="text-sm font-medium">Reader URL Template</label>
-              <HelpCircle className="h-3 w-3 text-muted-foreground" title="Template for generating the proxy URL" />
+              <HelpCircle className="h-3 w-3 text-muted-foreground" />
             </div>
             <Input
               placeholder="https://proxy.com/view/{slug}/{externalId}/"
