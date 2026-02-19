@@ -1,26 +1,26 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { db } from '@/lib/db';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { db } from "@/lib/db";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Plus } from 'lucide-react';
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Plus } from "lucide-react";
 
 export function PlaylistDialog() {
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
 
   const handleCreatePlaylist = async () => {
     if (!name) return;
-    
+
     await db.playlists.add({
       name,
       description,
@@ -28,14 +28,14 @@ export function PlaylistDialog() {
     });
 
     setOpen(false);
-    setName('');
-    setDescription('');
+    setName("");
+    setDescription("");
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
+        <Button variant="outline" className="gap-2">
           <Plus className="h-4 w-4" /> New Playlist
         </Button>
       </DialogTrigger>
@@ -53,7 +53,9 @@ export function PlaylistDialog() {
             />
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium">Description (Optional)</label>
+            <label className="text-sm font-medium">
+              Description (Optional)
+            </label>
             <Input
               placeholder="Books about React and Next.js"
               value={description}
