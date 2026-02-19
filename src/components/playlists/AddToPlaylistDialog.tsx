@@ -1,7 +1,7 @@
 'use client';
 
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '@/lib/db';
+import { db } from '@/lib/database/dexie';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -16,9 +16,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { libraryService } from '@/lib/services/library';
 
 export function AddToPlaylistDialog({ externalId }: { externalId: string }) {
-  const playlists = useLiveQuery(() => db.playlists.toArray());
+  const playlists = useLiveQuery(() => db.playlists.filter(p => !p.deleted).toArray());
 
-  const handleToggle = async (playlistId: number) => {
+  const handleToggle = async (playlistId: string) => {
     await libraryService.toggleBookInPlaylist(playlistId, externalId);
   };
 

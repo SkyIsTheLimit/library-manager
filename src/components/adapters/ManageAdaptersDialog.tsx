@@ -1,7 +1,7 @@
 "use client";
 
 import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/lib/db";
+import { db } from "@/lib/database/dexie";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,17 +13,22 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Trash2, List } from "lucide-react";
 import { AdapterFormDialog } from "./CreateAdapterDialog";
+import { syncService } from "@/lib/sync";
 
 export function ManageAdaptersDialog() {
-  const adapters = useLiveQuery(() => db.adapters.toArray()) || [];
+  const adapters = useLiveQuery(() => db.adapters.filter(a => !a.deleted).toArray()) || [];
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (
       confirm(
         "Are you sure you want to delete this adapter? This will not remove books using it, but they may no longer open correctly.",
       )
     ) {
-      await db.adapters.delete(id);
+      await db.adapters.update(id, {
+        deleted: true,
+        updatedAt: Date.now()
+      });
+      syncService.triggerSync();
     }
   };
 

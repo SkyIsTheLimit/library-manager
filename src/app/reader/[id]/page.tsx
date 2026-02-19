@@ -1,7 +1,7 @@
 "use client";
 
 import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/lib/db";
+import { db } from "@/lib/database/dexie";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,7 @@ import { libraryService } from "@/lib/services/library";
 export default function UniversalController() {
   const { id } = useParams();
   const router = useRouter();
-  const books = useLiveQuery(() => db.books.toArray());
+  const books = useLiveQuery(() => db.books.filter(b => !b.deleted).toArray());
   const activeBook = books?.find((b) => b.externalId === id);
   const progress = useLiveQuery(() =>
     db.progress

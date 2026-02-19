@@ -1,0 +1,25 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  "name": "library-manager",
+  "compatibility_date": "2026-02-07",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "minify": true,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "library-manager-db",
+      "database_id": "dee1fa41-378c-4293-b930-67e4f74a85cc",
+      "migrations_dir": "drizzle"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}

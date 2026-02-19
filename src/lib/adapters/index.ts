@@ -1,9 +1,9 @@
-import { db } from '../db';
+import { db } from '../database/dexie';
 import { GenericAdapter } from './generic';
 import { BookAdapter } from './types';
 
 export async function getAllAdapters(): Promise<BookAdapter[]> {
-  const customDefs = await db.adapters.toArray();
+  const customDefs = await db.adapters.filter(a => !a.deleted).toArray();
   return customDefs.map(def => new GenericAdapter(def));
 }
 

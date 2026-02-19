@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/lib/db";
+import { db } from "@/lib/database/dexie";
 import { AddBookDialog } from "@/components/books/AddBookDialog";
 import { AddToPlaylistDialog } from "@/components/playlists/AddToPlaylistDialog";
 import { PlaylistDialog } from "@/components/playlists/PlaylistDialog";
@@ -20,17 +20,17 @@ import Link from "next/link";
 import { libraryService } from "@/lib/services/library";
 
 export default function Dashboard() {
-  const [selectedPlaylistId, setSelectedPlaylistId] = useState<number | null>(
+  const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(
     null,
   );
 
   const books = useLiveQuery(() =>
-    db.books.orderBy("dateAdded").reverse().toArray(),
+    db.books.orderBy("dateAdded").reverse().filter(b => !b.deleted).toArray(),
   );
   const recentProgress = useLiveQuery(() =>
     db.progress.orderBy("lastAccessed").reverse().limit(3).toArray(),
   );
-  const playlists = useLiveQuery(() => db.playlists.toArray());
+  const playlists = useLiveQuery(() => db.playlists.filter(p => !p.deleted).toArray());
 
   const activePlaylist = playlists?.find((p) => p.id === selectedPlaylistId);
   const filteredBooks =
@@ -40,7 +40,7 @@ export default function Dashboard() {
         )
       : books;
 
-  const deleteBook = async (id: number, externalId: string) => {
+  const deleteBook = async (id: string, externalId: string) => {
     if (confirm("Are you sure you want to remove this book?")) {
       await libraryService.deleteBook(id, externalId);
     }
@@ -159,7 +159,7 @@ export default function Dashboard() {
               <select
                 className="flex h-8 w-fit rounded-md bg-secondary/50 px-3 py-1 text-xs font-bold uppercase tracking-tight text-foreground border-none hover:bg-secondary/80 transition-colors focus-visible:outline-none cursor-pointer appearance-none min-w-[120px]"
                 value={selectedPlaylistId || ""}
-                onChange={(e) => setSelectedPlaylistId(e.target.value ? Number(e.target.value) : null)}
+                onChange={(e) => setSelectedPlaylistId(e.target.value ? e.target.value : null)}
               >
                 <option value="">Filter by Playlist</option>
                 {playlists?.map((playlist) => (

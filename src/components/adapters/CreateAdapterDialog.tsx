@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { db } from "@/lib/db";
+import { db } from "@/lib/database/dexie";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Settings2, HelpCircle, Edit2 } from "lucide-react";
 import { AdapterDefinition } from "@/lib/adapters/types";
+import { syncService } from "@/lib/sync";
 
 interface AdapterFormDialogProps {
   adapter?: AdapterDefinition;
@@ -54,7 +55,7 @@ export function AdapterFormDialog({
         adapter?.id ||
         name.toLowerCase().replace(/\s+/g, "-") + "-" + Date.now();
 
-      const definition: AdapterDefinition = {
+      const definition = {
         ...adapter, // Keep existing selectors if they exist
         id,
         name,
@@ -63,23 +64,16 @@ export function AdapterFormDialog({
         titleSelector: adapter?.titleSelector || 'meta[property="og:title"]',
         authorSelector: adapter?.authorSelector || 'meta[name="author"]',
         coverSelector: adapter?.coverSelector || 'meta[property="og:image"]',
+        updatedAt: Date.now(),
       };
 
       if (adapter) {
-        // Find existing record ID for update if using Dexie auto-inc
-        const existing = await db.adapters
-          .where("id")
-          .equals(adapter.id)
-          .first();
-        if (existing?.id) {
-          await db.adapters.update(existing.id as any, definition);
-        } else {
-          await db.adapters.put(definition);
-        }
+        await db.adapters.put(definition);
       } else {
         await db.adapters.add(definition);
       }
 
+      syncService.triggerSync();
       setOpen(false);
       if (!adapter) {
         setName("");

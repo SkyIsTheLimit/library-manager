@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { db, Playlist } from "@/lib/db";
+import { db, Playlist } from "@/lib/database/dexie";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

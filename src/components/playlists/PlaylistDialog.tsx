@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { db } from "@/lib/db";
+import { db } from "@/lib/database/dexie";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
+import { syncService } from "@/lib/sync";
 
 export function PlaylistDialog() {
   const [open, setOpen] = useState(false);
@@ -22,11 +23,14 @@ export function PlaylistDialog() {
     if (!name) return;
 
     await db.playlists.add({
+      id: crypto.randomUUID(),
       name,
       description,
       bookIds: [],
+      updatedAt: Date.now(),
     });
 
+    syncService.triggerSync();
     setOpen(false);
     setName("");
     setDescription("");

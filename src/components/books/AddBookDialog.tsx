@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { db } from "@/lib/db";
+import { db } from "@/lib/database/dexie";
 import { useLiveQuery } from "dexie-react-hooks";
-import { fetchBookMetadata } from "@/lib/actions";
+import { libraryService } from "@/lib/services/library";
 import { getAdapterById, getAdapterForUrl } from "@/lib/adapters";
 import { AdapterFormDialog } from "@/components/adapters/CreateAdapterDialog";
 import { ManageAdaptersDialog } from "@/components/adapters/ManageAdaptersDialog";
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Plus, Loader2 } from "lucide-react";
+import { syncService } from "@/lib/sync";
 
 export function AddBookDialog() {
   const [open, setOpen] = useState(false);
@@ -61,7 +62,7 @@ export function AddBookDialog() {
     setError("");
 
     try {
-      const metadata = await fetchBookMetadata(url, selectedAdapterId);
+      const metadata = await libraryService.fetchBookMetadata(url, selectedAdapterId);
       if (!metadata || !metadata.externalId) {
         throw new Error(
           "Could not extract book information. Please check the URL and selected adapter.",
@@ -88,6 +89,7 @@ export function AddBookDialog() {
       );
 
       await db.books.add({
+        id: crypto.randomUUID(),
         externalId: metadata.externalId,
         source: metadata.source,
         slug: metadata.slug,
@@ -96,8 +98,10 @@ export function AddBookDialog() {
         coverUrl: metadata.coverUrl,
         readerUrl: readerUrl,
         dateAdded: Date.now(),
+        updatedAt: Date.now(),
       });
 
+      syncService.triggerSync();
       setOpen(false);
       setUrl("");
       setSelectedAdapterId("");

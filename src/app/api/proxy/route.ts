@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { auth } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
+  const { env } = await getCloudflareContext();
+  const session = await auth(env.DB).api.getSession({
+    headers: request.headers
+  });
+
+  if (!session) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+
   const url = request.nextUrl.searchParams.get('url');
 
   if (!url) {
