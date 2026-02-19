@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { AddBookDialog } from "@/components/AddBookDialog";
 import { AddToPlaylistDialog } from "@/components/AddToPlaylistDialog";
 import { PlaylistDialog } from "@/components/PlaylistDialog";
+import { EditPlaylistDialog } from "@/components/EditPlaylistDialog";
 import { UpdateProgressDialog } from "@/components/UpdateProgressDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,6 +20,10 @@ import {
 import Link from "next/link";
 
 export default function Dashboard() {
+  const [selectedPlaylistId, setSelectedPlaylistId] = useState<number | null>(
+    null,
+  );
+
   const books = useLiveQuery(() =>
     db.books.orderBy("dateAdded").reverse().toArray(),
   );
@@ -25,6 +31,14 @@ export default function Dashboard() {
     db.progress.orderBy("lastAccessed").reverse().limit(3).toArray(),
   );
   const playlists = useLiveQuery(() => db.playlists.toArray());
+
+  const activePlaylist = playlists?.find((p) => p.id === selectedPlaylistId);
+  const filteredBooks =
+    selectedPlaylistId && activePlaylist
+      ? books?.filter((book) =>
+          activePlaylist.bookIds.includes(book.externalId),
+        )
+      : books;
 
   const deleteBook = async (id: number, externalId: string) => {
     if (confirm("Are you sure you want to remove this book?")) {
@@ -39,12 +53,6 @@ export default function Dashboard() {
           }
         }
       }
-    }
-  };
-
-  const deletePlaylist = async (id: number) => {
-    if (confirm("Are you sure you want to delete this playlist?")) {
-      await db.playlists.delete(id);
     }
   };
 
@@ -163,78 +171,73 @@ export default function Dashboard() {
         </section>
       )}
 
-      {/* Playlists Section */}
-      {playlists && playlists.length > 0 && (
-        <section className="mb-12">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <List className="h-5 w-5" /> Playlists
-          </h2>
-          <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 no-scrollbar">
-            {playlists.map((playlist) => (
-              <Card
-                key={playlist.id}
-                className="flex-shrink-0 w-[240px] group relative bg-secondary/30 border-none"
-              >
-                <CardHeader className="p-4 pb-2">
-                  <div className="flex justify-between items-start">
-                    <CardTitle className="text-sm font-semibold">
-                      {playlist.name}
-                    </CardTitle>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => deletePlaylist(playlist.id!)}
-                    >
-                      <Trash2 className="h-3 w-3 text-destructive" />
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground line-clamp-1">
-                    {playlist.description}
-                  </p>
-                </CardHeader>
-                <CardContent className="p-4 pt-0">
-                  <p className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground flex items-center gap-1">
-                    <CheckCircle2 className="h-3 w-3" />{" "}
-                    {playlist.bookIds.length} Books
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
-      )}
-
       {/* All Books Section */}
       <section>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">All Books</h2>
-          <p className="text-xs text-muted-foreground">
-            {books?.length || 0} books in library
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="text-xl font-semibold whitespace-nowrap">
+              {activePlaylist ? `Playlist: ${activePlaylist.name}` : "All Books"}
+            </h2>
+            
+            <div className="flex items-center gap-2">
+              <select
+                className="flex h-8 w-fit rounded-md bg-secondary/50 px-3 py-1 text-xs font-bold uppercase tracking-tight text-foreground border-none hover:bg-secondary/80 transition-colors focus-visible:outline-none cursor-pointer appearance-none min-w-[120px]"
+                value={selectedPlaylistId || ""}
+                onChange={(e) => setSelectedPlaylistId(e.target.value ? Number(e.target.value) : null)}
+              >
+                <option value="">Filter by Playlist</option>
+                {playlists?.map((playlist) => (
+                  <option key={playlist.id} value={playlist.id}>
+                    {playlist.name} ({playlist.bookIds.length})
+                  </option>
+                ))}
+              </select>
+              
+              {activePlaylist && (
+                <div className="flex items-center gap-1 animate-in fade-in slide-in-from-left-2 duration-300">
+                  <EditPlaylistDialog playlist={activePlaylist} />
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    className="h-6 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary px-2"
+                    onClick={() => setSelectedPlaylistId(null)}
+                  >
+                    Clear
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+            {filteredBooks?.length || 0} {selectedPlaylistId ? "Filtered" : "Total"} Books
           </p>
         </div>
-        {books === undefined ? (
+        {filteredBooks === undefined ? (
           <div className="flex justify-center py-12">
             <p className="text-muted-foreground animate-pulse">
               Loading library...
             </p>
           </div>
-        ) : books.length === 0 ? (
+        ) : filteredBooks.length === 0 ? (
           <Card className="flex flex-col items-center justify-center py-20 text-center border-dashed border-2 bg-transparent">
             <div className="bg-secondary p-4 rounded-full mb-4">
               <BookOpen className="h-8 w-8 text-muted-foreground opacity-40" />
             </div>
             <p className="text-muted-foreground font-medium">
-              Your library is empty.
+              {selectedPlaylistId
+                ? "This playlist is empty."
+                : "Your library is empty."}
             </p>
             <p className="text-xs text-muted-foreground/60 mb-6">
-              Add a book URL to get started.
+              {selectedPlaylistId
+                ? "Add books to this playlist from the library below."
+                : "Add a book URL to get started."}
             </p>
-            <AddBookDialog />
+            {!selectedPlaylistId && <AddBookDialog />}
           </Card>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-6 gap-y-10">
-            {books.map((book) => {
+            {filteredBooks.map((book) => {
               const prog = recentProgress?.find(
                 (p) => p.bookId === book.externalId,
               );
