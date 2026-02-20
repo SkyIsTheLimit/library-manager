@@ -57,11 +57,11 @@ export function AuthNav() {
         ) : (
           <User className="h-4 w-4" />
         )}
-        <span className="text-xs font-medium hidden sm:inline-block">
+        <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline-block">
           {session.user.name}
         </span>
       </div>
-      <Button variant="ghost" size="icon" onClick={signOut} className="h-8 w-8">
+      <Button variant="ghost" size="icon" onClick={signOut} className="h-8 w-8 rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors">
         <LogOut className="h-4 w-4" />
       </Button>
     </div>

@@ -16,11 +16,13 @@ import { Edit3 } from 'lucide-react';
 export function UpdateProgressDialog({ 
   bookId, 
   initialChapter, 
-  initialPercent 
+  initialPercent,
+  children
 }: { 
   bookId: string, 
   initialChapter?: string, 
-  initialPercent?: number 
+  initialPercent?: number,
+  children?: React.ReactNode
 }) {
   const [open, setOpen] = useState(false);
   const [chapter, setChapter] = useState(initialChapter || '');
@@ -37,9 +39,11 @@ export function UpdateProgressDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-          <Edit3 className="h-4 w-4" />
-        </Button>
+        {children || (
+          <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+            <Edit3 className="h-4 w-4" />
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

@@ -15,7 +15,13 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 
 import { libraryService } from '@/lib/services/library';
 
-export function AddToPlaylistDialog({ externalId }: { externalId: string }) {
+export function AddToPlaylistDialog({ 
+  externalId,
+  children
+}: { 
+  externalId: string,
+  children?: React.ReactNode
+}) {
   const playlists = useLiveQuery(() => db.playlists.filter(p => !p.deleted).toArray());
 
   const handleToggle = async (playlistId: string) => {
@@ -25,9 +31,11 @@ export function AddToPlaylistDialog({ externalId }: { externalId: string }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-          <ListPlus className="h-4 w-4" />
-        </Button>
+        {children || (
+          <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+            <ListPlus className="h-4 w-4" />
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

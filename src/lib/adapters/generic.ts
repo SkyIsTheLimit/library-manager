@@ -1,4 +1,3 @@
-import * as cheerio from 'cheerio';
 import { BookAdapter, BookMetadata, AdapterDefinition } from './types';
 
 export class GenericAdapter implements BookAdapter {
@@ -28,11 +27,22 @@ export class GenericAdapter implements BookAdapter {
       }
 
       const html = await response.text();
-      const $ = cheerio.load(html);
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
 
-      const title = $(this.definition.titleSelector || 'meta[property="og:title"]').attr('content') || $('title').text() || '';
-      const author = $(this.definition.authorSelector || 'meta[name="author"]').attr('content') || '';
-      const coverUrl = $(this.definition.coverSelector || 'meta[property="og:image"]').attr('content') || '';
+      const getMetaContent = (selector: string) => {
+        if (!selector) return null;
+        try {
+          const el = doc.querySelector(selector);
+          return el ? (el.getAttribute('content') || el.textContent) : null;
+        } catch (e) {
+          return null;
+        }
+      };
+
+      const title = getMetaContent(this.definition.titleSelector || 'meta[property="og:title"]') || doc.title || '';
+      const author = getMetaContent(this.definition.authorSelector || 'meta[name="author"]') || '';
+      const coverUrl = getMetaContent(this.definition.coverSelector || 'meta[property="og:image"]') || '';
       
       // Extract ID and Slug from URL
       let externalId = '';

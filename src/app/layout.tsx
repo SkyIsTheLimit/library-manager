@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Library Manager",
+  title: "Z-BOOKS",
   description: "Personalized library manager for all your books.",
 };
 
@@ -28,12 +28,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background text-foreground`}
       >
-        <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
           <div className="container flex h-14 items-center px-4 max-w-6xl mx-auto">
             <div className="mr-4 flex">
               <a className="mr-6 flex items-center space-x-2" href="/">
-                <span className="font-bold sm:inline-block">
-                  Library Manager
+                <span className="font-black tracking-tighter sm:inline-block text-lg">
+                  Z-BOOKS
                 </span>
               </a>
             </div>
@@ -41,7 +41,7 @@ export default function RootLayout({
               <div className="w-full flex-1 md:w-auto md:flex-none">
                 {/* Search could go here */}
               </div>
-              <nav className="flex items-center">
+              <nav className="flex items-center gap-2">
                 <AuthNav />
               </nav>
             </div>
